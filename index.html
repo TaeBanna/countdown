@@ -3,322 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Countdown Creator</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Countdown</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --border: #1e1e2e;
-    --accent: #e8c547;
-    --accent2: #f07847;
-    --text: #e8e8f0;
-    --muted: #5a5a8a;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    position: relative; overflow-x: hidden;
-  }
-  body::before {
-    content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 60px 60px; opacity: .35; pointer-events: none;
-  }
-  body::after {
-    content: ''; position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    width: 900px; height: 900px;
-    background: radial-gradient(circle, rgba(232,197,71,.05) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .wrap {
-    position: relative; z-index: 1;
-    width: 100%; max-width: 860px;
-    padding: 48px 24px;
-    display: flex; flex-direction: column;
-    align-items: center; gap: 36px;
-  }
-  /* Header */
-  .header { text-align: center; animation: fadeDown .7s ease both; }
-  .header h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.8rem, 7vw, 4.5rem);
-    letter-spacing: .18em;
-    background: linear-gradient(130deg, var(--accent) 30%, var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .header p { color: var(--muted); font-size: .85rem; letter-spacing: .1em; margin-top: 6px; }
-  /* Preview */
-  .preview {
-    width: 100%; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 30px 24px 26px;
-    animation: fadeUp .7s .1s ease both;
-  }
-  .slabel { font-size: .65rem; letter-spacing: .25em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
-  .preview-event { text-align: center; font-size: 1.1rem; font-weight: 300; color: var(--text); margin-bottom: 20px; min-height: 1.5em; }
-  .preview-event strong { color: var(--accent); font-weight: 600; }
-  .cd-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
-  .cd-block {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px 8px 16px;
-    text-align: center; position: relative; overflow: hidden;
-  }
-  .cd-block::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  }
-  .cd-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    color: var(--accent);
-    text-shadow: 0 0 30px rgba(232,197,71,.25);
-    line-height: 1;
-  }
-  .cd-num.flash { animation: flash .15s ease; }
-  .cd-lbl { font-size: .65rem; letter-spacing: .18em; color: var(--muted); margin-top: 6px; text-transform: uppercase; }
-  /* Form */
-  .form-card {
-    width: 100%; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 32px; animation: fadeUp .7s .2s ease both;
-    display: flex; flex-direction: column; gap: 20px;
-  }
-  .field { display: flex; flex-direction: column; gap: 7px; }
-  .field label { font-size: .75rem; letter-spacing: .12em; color: var(--muted); }
-  .field input {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: 'Sarabun', sans-serif; font-size: 1rem;
-    padding: 13px 16px; outline: none;
-    transition: border-color .2s, box-shadow .2s; width: 100%;
-  }
-  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,197,71,.1); }
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(.5) sepia(1) saturate(2) hue-rotate(5deg); cursor: pointer;
-  }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  /* Gen button */
-  .btn-gen {
-    width: 100%;
-    background: linear-gradient(130deg, var(--accent), var(--accent2));
-    border: none; border-radius: 12px;
-    color: #0a0a0f;
-    font-family: 'Sarabun', sans-serif; font-size: 1.05rem; font-weight: 700;
-    letter-spacing: .05em; padding: 16px; cursor: pointer;
-    transition: opacity .2s, transform .2s, box-shadow .2s;
-    animation: fadeUp .7s .25s ease both;
-  }
-  .btn-gen:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(232,197,71,.2); }
-  /* Share box */
-  .share-box {
-    width: 100%;
-    background: rgba(232,197,71,.05);
-    border: 1px solid rgba(232,197,71,.25);
-    border-radius: 20px; padding: 26px;
-    display: none; flex-direction: column; gap: 14px;
-    animation: fadeUp .4s ease both;
-  }
-  .share-box.show { display: flex; }
-  .share-title { font-size: .7rem; letter-spacing: .2em; color: var(--accent); text-transform: uppercase; }
-  .link-row { display: flex; gap: 10px; }
-  .link-input {
-    flex: 1; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--muted);
-    font-family: 'Sarabun', sans-serif; font-size: .85rem;
-    padding: 12px 14px; outline: none;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default;
-  }
-  .btn-copy {
-    background: linear-gradient(130deg, var(--accent), var(--accent2));
-    border: none; border-radius: 10px;
-    color: #0a0a0f; font-family: 'Sarabun', sans-serif;
-    font-size: .9rem; font-weight: 700; padding: 12px 22px;
-    cursor: pointer; white-space: nowrap;
-    transition: opacity .2s, transform .2s;
-  }
-  .btn-copy:hover { opacity: .88; transform: translateY(-1px); }
-  .btn-view {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: transparent;
-    border: 1px solid rgba(232,197,71,.3);
-    border-radius: 10px; color: var(--accent);
-    font-family: 'Sarabun', sans-serif; font-size: .9rem;
-    padding: 11px 20px; cursor: pointer; text-decoration: none;
-    transition: border-color .2s, background .2s; width: fit-content;
-  }
-  .btn-view:hover { border-color: var(--accent); background: rgba(232,197,71,.07); }
-  /* How to */
-  .howto {
-    width: 100%; background: var(--surface);
-    border: 1px dashed var(--border); border-radius: 16px;
-    padding: 24px 28px;
-    animation: fadeUp .7s .35s ease both;
-  }
-  .howto h3 { font-size: .65rem; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
-  .steps { display: flex; flex-direction: column; gap: 12px; }
-  .step { display: flex; align-items: flex-start; gap: 14px; font-size: .9rem; color: #9090b8; line-height: 1.55; }
-  .snum {
-    width: 24px; height: 24px; flex-shrink: 0;
-    border-radius: 50%; background: var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Bebas Neue', sans-serif; font-size: .9rem; color: var(--accent);
-    margin-top: 1px;
-  }
-  .step a { color: var(--accent); text-decoration: none; }
-  .step a:hover { text-decoration: underline; }
-  code { font-size: .82rem; background: rgba(255,255,255,.05); padding: 2px 6px; border-radius: 4px; }
-  /* Animations */
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-18px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes flash { 0%{transform:scale(1)} 50%{transform:scale(1.1);color:var(--accent2)} 100%{transform:scale(1)} }
-  @media(max-width:580px) {
-    .cd-grid { grid-template-columns: repeat(2,1fr); }
-    .row2 { grid-template-columns: 1fr; }
-    .form-card, .howto { padding: 20px; }
-    .link-row { flex-direction: column; }
-    .btn-copy { width: 100%; }
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#f5f4f0; --card:#fff; --text:#1a1a1a; --sub:#888;
+  --border:#e8e6e0; --accent:#2563eb; --al:#eff6ff; --green:#16a34a;
+}
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; height:54px; background:var(--card);
+  border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100;
+}
+.logo { font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:7px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.tabs { display:flex; background:var(--bg); border-radius:8px; padding:3px; gap:2px; }
+.tab {
+  padding:5px 16px; border-radius:6px; font-size:.82rem; font-weight:500;
+  cursor:pointer; border:none; background:transparent; color:var(--sub);
+  font-family:'Inter',sans-serif; transition:all .15s;
+}
+.tab.on { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.pg { display:none; }
+.pg.on { display:block; }
+#vp { display:none; position:fixed; inset:0; flex-direction:column; align-items:center; justify-content:center; padding:32px 20px; background:#0d0d12; }
+#vp.on { display:flex; }
+.wrap { max-width:540px; margin:0 auto; padding:28px 20px 80px; }
+.ptitle { font-size:1.2rem; font-weight:600; letter-spacing:-.02em; margin-bottom:3px; }
+.psub { color:var(--sub); font-size:.84rem; margin-bottom:22px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.04); margin-bottom:12px; }
+.cl { font-size:.7rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--sub); margin-bottom:14px; }
+.field { margin-bottom:12px; }
+.field:last-child { margin-bottom:0; }
+.field label { display:block; font-size:.79rem; font-weight:500; color:#555; margin-bottom:5px; }
+.field input {
+  width:100%; background:var(--bg); border:1px solid var(--border);
+  border-radius:9px; color:var(--text); font-family:'Inter',sans-serif;
+  font-size:.92rem; padding:10px 13px; outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.09); background:#fff; }
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator { opacity:.4; cursor:pointer; }
+.r2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.pvc { background:#111118; border-radius:14px; padding:18px 16px 16px; margin-bottom:12px; }
+.pvn { font-size:.78rem; color:rgba(255,255,255,.3); text-align:center; margin-bottom:14px; font-weight:300; min-height:1.1em; }
+.pvn b { color:rgba(255,255,255,.6); font-weight:500; }
+.pvg { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.pvb { text-align:center; }
+.pvnum { font-family:'DM Mono',monospace; font-size:clamp(1.4rem,5vw,2rem); font-weight:400; color:#fff; line-height:1; display:block; }
+.pvlbl { font-size:.57rem; letter-spacing:.12em; color:rgba(255,255,255,.22); text-transform:uppercase; margin-top:4px; display:block; }
+.btn-p {
+  width:100%; background:var(--accent); border:none; border-radius:11px; color:#fff;
+  font-family:'Inter',sans-serif; font-size:.92rem; font-weight:600; padding:13px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;
+  transition:background .15s,transform .1s; margin-bottom:12px;
+}
+.btn-p:hover { background:#1d4ed8; }
+.btn-p:active { transform:scale(.98); }
+.sc { display:none; }
+.sc.on { display:block; }
+.sok { font-size:.7rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--green); margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+.lr { display:flex; gap:7px; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:3px 3px 3px 12px; margin-bottom:9px; }
+.lt { flex:1; font-family:'DM Mono',monospace; font-size:.74rem; color:#666; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-c { background:var(--text); border:none; border-radius:7px; color:#fff; font-family:'Inter',sans-serif; font-size:.77rem; font-weight:600; padding:7px 13px; cursor:pointer; flex-shrink:0; transition:background .15s; }
+.btn-c:hover { background:#333; }
+.btn-c.ok { background:var(--green); }
+.btn-vl { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:var(--al); border:1px solid #bfdbfe; border-radius:9px; color:var(--accent); font-family:'Inter',sans-serif; font-size:.84rem; font-weight:500; padding:10px; cursor:pointer; text-decoration:none; transition:background .15s; }
+.btn-vl:hover { background:#dbeafe; }
+.back { position:fixed; top:15px; left:15px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:8px; color:rgba(255,255,255,.4); font-family:'Inter',sans-serif; font-size:.77rem; padding:7px 13px; cursor:pointer; display:flex; align-items:center; gap:5px; transition:all .15s; z-index:5; }
+.back:hover { background:rgba(255,255,255,.13); color:rgba(255,255,255,.7); }
+.vi { display:flex; flex-direction:column; align-items:center; width:100%; max-width:960px; }
+.vname { font-size:clamp(.78rem,2vw,.98rem); font-weight:300; letter-spacing:.2em; color:rgba(255,255,255,.28); text-transform:uppercase; margin-bottom:10px; text-align:center; }
+.vline { width:36px; height:1px; background:rgba(255,255,255,.1); margin-bottom:clamp(22px,5vh,46px); }
+.vg { display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(8px,2vw,18px); width:100%; }
+.vb { text-align:center; padding:clamp(18px,4vh,44px) 6px clamp(14px,3vh,30px); border-radius:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); }
+.vnum { font-family:'DM Mono',monospace; font-size:clamp(3rem,9vw,8rem); font-weight:400; color:#fff; line-height:1; display:block; letter-spacing:-.02em; }
+.vnum.pp { animation:pp .18s ease; }
+.vlbl { font-size:clamp(.54rem,.9vw,.7rem); letter-spacing:.2em; color:rgba(255,255,255,.18); text-transform:uppercase; margin-top:clamp(5px,1.5vh,10px); display:block; }
+.vdt { margin-top:clamp(16px,3vh,34px); font-size:clamp(.68rem,1.1vw,.84rem); color:rgba(255,255,255,.17); letter-spacing:.1em; text-align:center; }
+.vbar { position:fixed; bottom:0; left:0; height:2px; background:rgba(255,255,255,.38); transition:width 1s linear; width:0%; }
+#dn { position:fixed; inset:0; z-index:20; background:#0d0d12; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+#dn.on { display:flex; }
+.di { font-size:clamp(2.5rem,7vw,4.5rem); animation:bob 2s ease-in-out infinite; }
+.dh { font-size:clamp(1.6rem,5vw,3rem); font-weight:600; color:#fff; letter-spacing:-.02em; text-align:center; }
+.ds { font-size:.88rem; color:rgba(255,255,255,.23); letter-spacing:.1em; text-align:center; }
+@keyframes pp { 0%{transform:scale(1)} 45%{transform:scale(1.09);color:rgba(255,255,255,.6)} 100%{transform:scale(1)} }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@media(max-width:500px) { .vg,.pvg{grid-template-columns:repeat(2,1fr);} .r2{grid-template-columns:1fr;} .tab{padding:5px 10px;} }
+@media(max-height:480px) and (orientation:landscape) { .vnum{font-size:clamp(2.2rem,10vh,4.5rem);} .vb{padding:8px 6px;} .vline{margin-bottom:8px;} }
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <div class="header">
-    <h1>⏳ COUNTDOWN</h1>
-    <p>สร้างลิงก์นับถอยหลัง — แชร์ให้ทุกคนดูได้ทันที</p>
+<nav>
+  <div class="logo"><div class="dot"></div>Countdown</div>
+  <div class="tabs">
+    <button class="tab on" onclick="goTab('e')">สร้าง</button>
+    <button class="tab" id="tv" onclick="goTab('v')">ดูอย่างเดียว</button>
   </div>
+</nav>
 
-  <!-- Live Preview -->
-  <div class="preview">
-    <div class="slabel">👁 ตัวอย่าง Real-time</div>
-    <div class="preview-event" id="pvEvent">ตั้งชื่อและวันที่ด้านล่าง</div>
-    <div class="cd-grid">
-      <div class="cd-block"><div class="cd-num" id="pvD">--</div><div class="cd-lbl">วัน</div></div>
-      <div class="cd-block"><div class="cd-num" id="pvH">--</div><div class="cd-lbl">ชั่วโมง</div></div>
-      <div class="cd-block"><div class="cd-num" id="pvM">--</div><div class="cd-lbl">นาที</div></div>
-      <div class="cd-block"><div class="cd-num" id="pvS">--</div><div class="cd-lbl">วินาที</div></div>
-    </div>
-  </div>
-
-  <!-- Form -->
-  <div class="form-card">
-    <div class="slabel">⚙ ตั้งค่า</div>
-    <div class="field">
-      <label>ชื่อเหตุการณ์</label>
-      <input type="text" id="eName" placeholder="เช่น วันเกิด ✨  •  ปีใหม่ 🎆  •  วันสอบ 📚" oninput="onChange()"/>
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label>วันที่เป้าหมาย</label>
-        <input type="date" id="eDate" oninput="onChange()"/>
-      </div>
-      <div class="field">
-        <label>เวลา (ไม่บังคับ)</label>
-        <input type="time" id="eTime" value="00:00" oninput="onChange()"/>
+<div class="pg on" id="ep">
+  <div class="wrap">
+    <div class="ptitle">สร้าง Countdown</div>
+    <div class="psub">ตั้งค่า แล้วแชร์ลิงก์ให้คนอื่นดูได้เลย</div>
+    <div class="pvc">
+      <div class="pvn" id="pvn">ตั้งชื่อเหตุการณ์ด้านล่าง</div>
+      <div class="pvg">
+        <div class="pvb"><span class="pvnum" id="pvD">--</span><span class="pvlbl">วัน</span></div>
+        <div class="pvb"><span class="pvnum" id="pvH">--</span><span class="pvlbl">ชั่วโมง</span></div>
+        <div class="pvb"><span class="pvnum" id="pvM">--</span><span class="pvlbl">นาที</span></div>
+        <div class="pvb"><span class="pvnum" id="pvS">--</span><span class="pvlbl">วินาที</span></div>
       </div>
     </div>
-  </div>
-
-  <button class="btn-gen" onclick="generate()">✦ สร้างลิงก์แชร์</button>
-
-  <!-- Share Box -->
-  <div class="share-box" id="shareBox">
-    <div class="share-title">🔗 ลิงก์สำหรับแชร์</div>
-    <div class="link-row">
-      <input class="link-input" id="shareLink" readonly/>
-      <button class="btn-copy" id="copyBtn" onclick="copyLink()">คัดลอก</button>
+    <div class="card">
+      <div class="cl">ตั้งค่า</div>
+      <div class="field">
+        <label>ชื่อเหตุการณ์</label>
+        <input type="text" id="en" placeholder="เช่น วันเกิด, ปีใหม่, วันสอบ..." oninput="oc()"/>
+      </div>
+      <div class="r2">
+        <div class="field"><label>วันที่เป้าหมาย</label><input type="date" id="ed" oninput="oc()"/></div>
+        <div class="field"><label>เวลา</label><input type="time" id="et" value="00:00" oninput="oc()"/></div>
+      </div>
     </div>
-    <a class="btn-view" id="viewBtn" href="#" target="_blank">↗ เปิดหน้าดูอย่างเดียว</a>
-  </div>
-
-  <!-- How To -->
-  <div class="howto">
-    <h3>📌 วิธีแชร์ให้คนอื่นดูออนไลน์ (ฟรี)</h3>
-    <div class="steps">
-      <div class="step"><div class="snum">1</div><span>วางไฟล์ <code>index.html</code> และ <code>view.html</code> ไว้ในโฟลเดอร์เดียวกัน</span></div>
-      <div class="step"><div class="snum">2</div><span>ไปที่ <a href="https://app.netlify.com/drop" target="_blank">netlify.com/drop</a> แล้วลากโฟลเดอร์ทั้งหมดวางลงไป — ใช้เวลาไม่ถึง 1 นาที ฟรี 100%</span></div>
-      <div class="step"><div class="snum">3</div><span>Netlify จะให้ URL เช่น <code>https://abc123.netlify.app</code> — กลับมาที่หน้านี้แล้วกด <strong style="color:var(--accent)">สร้างลิงก์แชร์</strong> ลิงก์จะพร้อมส่งต่อให้ทุกคนดูได้เลย!</span></div>
+    <button class="btn-p" onclick="gen()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      สร้างลิงก์แชร์
+    </button>
+    <div class="card sc" id="sc">
+      <div class="sok"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>ลิงก์พร้อมแชร์แล้ว</div>
+      <div class="lr"><div class="lt" id="sl"></div><button class="btn-c" id="cb" onclick="cp()">คัดลอก</button></div>
+      <a class="btn-vl" href="#" id="vb" onclick="ov(event)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        เปิดหน้าดูอย่างเดียว
+      </a>
     </div>
   </div>
-
 </div>
+
+<div class="pg" id="vp">
+  <button class="back" onclick="goTab('e')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>กลับ
+  </button>
+  <div class="vi">
+    <div class="vname" id="vn"></div>
+    <div class="vline"></div>
+    <div class="vg">
+      <div class="vb"><span class="vnum" id="vD">00</span><span class="vlbl">วัน</span></div>
+      <div class="vb"><span class="vnum" id="vH">00</span><span class="vlbl">ชั่วโมง</span></div>
+      <div class="vb"><span class="vnum" id="vM">00</span><span class="vlbl">นาที</span></div>
+      <div class="vb"><span class="vnum" id="vS">00</span><span class="vlbl">วินาที</span></div>
+    </div>
+    <div class="vdt" id="vdt"></div>
+  </div>
+  <div class="vbar" id="vb2"></div>
+  <div id="dn">
+    <div class="di">🎉</div>
+    <div class="dh" id="dnt">ถึงวันสำคัญแล้ว!</div>
+    <div class="ds">The moment has arrived</div>
+  </div>
+</div>
+
 <script>
-  const tmr = new Date(); tmr.setDate(tmr.getDate()+1);
-  document.getElementById('eDate').value = tmr.toISOString().split('T')[0];
+let pt=null,vt=null,vtg=null,vs=null;
+const tmr=new Date();tmr.setDate(tmr.getDate()+1);
+document.getElementById('ed').value=tmr.toISOString().split('T')[0];
 
-  let timer = null;
+window.addEventListener('DOMContentLoaded',()=>{
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('date')){
+    if(p.get('name')) document.getElementById('en').value=p.get('name');
+    document.getElementById('ed').value=p.get('date');
+    if(p.get('time')) document.getElementById('et').value=p.get('time');
+    oc(); gen(); goTab('v');
+  } else { oc(); }
+});
 
-  function pad(n){ return String(n).padStart(2,'0'); }
+function pad(n){return String(n).padStart(2,'0');}
+function gt(){
+  const d=document.getElementById('ed').value,t=document.getElementById('et').value||'00:00';
+  if(!d) return null;
+  const[y,mo,da]=d.split('-').map(Number),[h,mi]=t.split(':').map(Number);
+  return new Date(y,mo-1,da,h,mi,0,0);
+}
 
-  function getTarget(){
-    const d = document.getElementById('eDate').value;
-    const t = document.getElementById('eTime').value || '00:00';
-    if(!d) return null;
-    const [y,mo,da]=d.split('-').map(Number);
-    const [h,mi]=t.split(':').map(Number);
-    return new Date(y,mo-1,da,h,mi,0,0);
+function goTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('ep').classList.remove('on');
+  document.getElementById('vp').classList.remove('on');
+  document.getElementById('vp').style.display='none';
+  if(tab==='v'){
+    document.getElementById('tv').classList.add('on');
+    document.getElementById('vp').classList.add('on');
+    document.getElementById('vp').style.display='flex';
+    sv();
+  } else {
+    document.querySelector('.tab').classList.add('on');
+    document.getElementById('ep').classList.add('on');
+    clearInterval(vt);
   }
+}
 
-  function tick(id,val){
-    const el=document.getElementById(id);
-    if(el.textContent!==val){ el.textContent=val; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+function se(id,v){const e=document.getElementById(id);if(e.textContent!==v)e.textContent=v;}
+function up(){
+  const name=document.getElementById('en').value.trim(),tg=gt();
+  if(name) document.getElementById('pvn').innerHTML=`นับถอยหลังสู่ <b>${name}</b>`;
+  else document.getElementById('pvn').textContent='ตั้งชื่อเหตุการณ์ด้านล่าง';
+  if(!tg){['pvD','pvH','pvM','pvS'].forEach(id=>se(id,'--'));return;}
+  const diff=tg-new Date();
+  if(diff<=0){['pvD','pvH','pvM','pvS'].forEach(id=>se(id,'00'));return;}
+  const s=Math.floor(diff/1000);
+  se('pvD',pad(Math.floor(s/86400)));se('pvH',pad(Math.floor((s%86400)/3600)));
+  se('pvM',pad(Math.floor((s%3600)/60)));se('pvS',pad(s%60));
+}
+function oc(){clearInterval(pt);up();pt=setInterval(up,1000);}
+
+function gen(){
+  const name=document.getElementById('en').value.trim();
+  const date=document.getElementById('ed').value,time=document.getElementById('et').value||'00:00';
+  if(!date){alert('กรุณาเลือกวันที่');return;}
+  const p=new URLSearchParams();
+  if(name)p.set('name',name);p.set('date',date);p.set('time',time);
+  const url=`${window.location.href.split('?')[0]}?${p.toString()}`;
+  document.getElementById('sl').textContent=url;
+  document.getElementById('vb').href=url;
+  document.getElementById('sc').classList.add('on');
+  window.history.replaceState({},'',url);
+}
+
+function ov(e){e.preventDefault();goTab('v');}
+async function cp(){
+  const t=document.getElementById('sl').textContent;
+  try{await navigator.clipboard.writeText(t);}catch{}
+  const b=document.getElementById('cb');b.textContent='✓ แล้ว!';b.classList.add('ok');
+  setTimeout(()=>{b.textContent='คัดลอก';b.classList.remove('ok');},2000);
+}
+
+function sv(){
+  clearInterval(vt);document.getElementById('dn').classList.remove('on');
+  const name=document.getElementById('en').value.trim();
+  document.getElementById('vn').textContent=name||'COUNTDOWN';
+  if(name) document.title=`${name} — Countdown`;
+  vtg=gt();vs=new Date();
+  if(vtg){
+    const[h,mi]=(document.getElementById('et').value||'00:00').split(':').map(Number);
+    const lbl=vtg.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('vdt').textContent=lbl+((h===0&&mi===0)?'':` · ${pad(h)}:${pad(mi)} น.`);
   }
+  tv2();vt=setInterval(tv2,1000);
+}
 
-  function updatePreview(){
-    const name=document.getElementById('eName').value.trim();
-    const target=getTarget();
-    if(name) document.getElementById('pvEvent').innerHTML=`นับถอยหลังสู่ <strong>${name}</strong>`;
-    else document.getElementById('pvEvent').textContent='ตั้งชื่อและวันที่ด้านล่าง';
-    if(!target){ ['pvD','pvH','pvM','pvS'].forEach(id=>document.getElementById(id).textContent='--'); return; }
-    const diff=target-new Date();
-    if(diff<=0){ ['pvD','pvH','pvM','pvS'].forEach(id=>document.getElementById(id).textContent='00'); return; }
-    const s=Math.floor(diff/1000);
-    tick('pvD',pad(Math.floor(s/86400)));
-    tick('pvH',pad(Math.floor((s%86400)/3600)));
-    tick('pvM',pad(Math.floor((s%3600)/60)));
-    tick('pvS',pad(s%60));
+function bump(id){const e=document.getElementById(id);e.classList.remove('pp');void e.offsetWidth;e.classList.add('pp');}
+function setv(id,v){const e=document.getElementById(id),nv=pad(v);if(e.textContent!==nv){e.textContent=nv;bump(id);}}
+
+function tv2(){
+  if(!vtg)return;
+  const now=new Date(),diff=vtg-now;
+  if(vs){const pct=Math.max(0,Math.min(100,((now-vs)/(vtg-vs))*100));document.getElementById('vb2').style.width=pct+'%';}
+  if(diff<=0){
+    ['vD','vH','vM','vS'].forEach(id=>document.getElementById(id).textContent='00');
+    const name=document.getElementById('en').value.trim();
+    document.getElementById('dnt').textContent=name||'ถึงวันสำคัญแล้ว!';
+    document.getElementById('dn').classList.add('on');
+    document.getElementById('vb2').style.width='100%';
+    clearInterval(vt);return;
   }
-
-  function onChange(){
-    clearInterval(timer);
-    updatePreview();
-    timer=setInterval(updatePreview,1000);
-  }
-
-  function generate(){
-    const name=document.getElementById('eName').value.trim();
-    const date=document.getElementById('eDate').value;
-    const time=document.getElementById('eTime').value||'00:00';
-    if(!date){ alert('กรุณาเลือกวันที่เป้าหมาย'); return; }
-    const base=window.location.href.replace(/index\.html.*$/,'').replace(/\?.*$/,'').replace(/\/$/,'');
-    const p=new URLSearchParams();
-    if(name) p.set('name',name);
-    p.set('date',date); p.set('time',time);
-    const url=`${base}/view.html?${p.toString()}`;
-    document.getElementById('shareLink').value=url;
-    document.getElementById('viewBtn').href=url;
-    const box=document.getElementById('shareBox');
-    box.classList.add('show');
-    box.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }
-
-  async function copyLink(){
-    const val=document.getElementById('shareLink').value;
-    try{ await navigator.clipboard.writeText(val); }
-    catch{ document.getElementById('shareLink').select(); document.execCommand('copy'); }
-    const btn=document.getElementById('copyBtn');
-    btn.textContent='✓ คัดลอกแล้ว!';
-    setTimeout(()=>btn.textContent='คัดลอก',2000);
-  }
-
-  onChange();
+  const s=Math.floor(diff/1000);
+  setv('vD',Math.floor(s/86400));setv('vH',Math.floor((s%86400)/3600));
+  setv('vM',Math.floor((s%3600)/60));setv('vS',s%60);
+}
 </script>
 </body>
 </html>
