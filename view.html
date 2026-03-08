@@ -4,401 +4,337 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Countdown</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sarabun:wght@200;300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #07070d;
-    --accent: #e8c547;
-    --accent2: #f07847;
-    --text: #e8e8f0;
-    --muted: #404070;
-    --dim: #1a1a28;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  html, body {
-    width:100%; height:100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    overflow: hidden;
-  }
+html, body {
+  width:100%; height:100%;
+  background: #0b0b10;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
 
-  /* Starfield canvas */
-  #stars {
-    position: fixed; inset: 0; z-index: 0;
-    pointer-events: none;
-  }
+/* Subtle grid background */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events:none;
+}
 
-  /* Central glow */
-  .glow {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(232,197,71,.07) 0%, transparent 65%);
-    z-index: 0; pointer-events: none;
-    animation: pulse 4s ease-in-out infinite;
-  }
+/* Center glow */
+body::after {
+  content:'';
+  position:fixed; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:600px; height:600px;
+  background:radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 65%);
+  pointer-events:none;
+  animation: breathe 6s ease-in-out infinite;
+}
 
-  .page {
-    position: relative; z-index: 1;
-    width: 100%; height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 40px 24px;
-    gap: 0;
-  }
+.page {
+  position:relative; z-index:1;
+  width:100%; height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:40px 28px;
+}
 
-  /* Event name */
-  .event-name {
-    font-family: 'Sarabun', sans-serif;
-    font-weight: 200;
-    font-size: clamp(1rem, 2.5vw, 1.5rem);
-    letter-spacing: .25em;
-    color: rgba(232,197,71,.6);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    text-align: center;
-    opacity: 0;
-    animation: riseIn .8s .1s ease forwards;
-  }
+/* Event name */
+.ev-name {
+  font-size: clamp(.8rem, 2vw, 1.1rem);
+  font-weight: 300;
+  letter-spacing: .3em;
+  color: rgba(255,255,255,.35);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  text-align: center;
+  opacity:0;
+  animation: up .7s .1s ease forwards;
+}
 
-  /* Divider line */
-  .divider {
-    width: 60px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    margin-bottom: clamp(32px, 5vh, 56px);
-    opacity: 0;
-    animation: riseIn .8s .2s ease forwards;
-  }
+/* Thin line */
+.divline {
+  width: 48px; height: 1px;
+  background: rgba(255,255,255,.12);
+  margin-bottom: clamp(32px, 6vh, 60px);
+  opacity:0;
+  animation: up .7s .2s ease forwards;
+}
 
-  /* Big countdown grid */
-  .cd-grid {
+/* ── HORIZONTAL STRIP ── */
+.countdown-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 1000px;
+  opacity:0;
+  animation: up .7s .3s ease forwards;
+}
+
+.unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.unit-num {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(4rem, 13vw, 10rem);
+  font-weight: 300;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -.04em;
+  display: block;
+  text-align: center;
+  transition: color .2s;
+  white-space: nowrap;
+}
+
+.unit-num.bump { animation: bump .2s ease; }
+
+.unit-lbl {
+  font-size: clamp(.58rem, 1.1vw, .75rem);
+  font-weight: 400;
+  letter-spacing: .22em;
+  color: rgba(255,255,255,.22);
+  text-transform: uppercase;
+  margin-top: clamp(8px, 2vh, 14px);
+  display: block;
+}
+
+/* Colon separator */
+.colon {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(3rem, 9vw, 7rem);
+  font-weight: 200;
+  color: rgba(255,255,255,.1);
+  line-height: 1;
+  padding: 0 clamp(4px, 1.2vw, 16px);
+  /* align with numbers */
+  align-self: flex-start;
+  margin-top: 0;
+  user-select: none;
+}
+
+/* Target date */
+.target-dt {
+  margin-top: clamp(24px, 4vh, 44px);
+  font-size: clamp(.7rem, 1.2vw, .88rem);
+  font-weight: 300;
+  letter-spacing: .18em;
+  color: rgba(255,255,255,.18);
+  text-transform: uppercase;
+  text-align: center;
+  opacity:0;
+  animation: up .7s .5s ease forwards;
+}
+
+/* Progress line */
+.progress {
+  position: fixed; bottom:0; left:0;
+  height: 1px;
+  background: rgba(255,255,255,.3);
+  transition: width 1s linear;
+  width: 0%;
+}
+
+/* Done overlay */
+#done {
+  display: none;
+  position: fixed; inset:0; z-index:20;
+  background: #0b0b10;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  animation: fadeIn .5s ease;
+}
+#done.show { display: flex; }
+
+.done-ico { font-size: clamp(3rem, 7vw, 5rem); animation: bob 2s ease-in-out infinite; }
+.done-name {
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  font-weight: 600; color: #fff;
+  letter-spacing: -.02em; text-align: center;
+}
+.done-sub {
+  font-size: clamp(.8rem, 1.5vw, 1rem);
+  color: rgba(255,255,255,.25); letter-spacing: .15em; text-align: center;
+}
+
+/* Back to creator */
+.back-link {
+  position: fixed; top:18px; left:18px; z-index:30;
+  display: flex; align-items: center; gap: 6px;
+  font-size: .75rem; font-weight: 500;
+  color: rgba(255,255,255,.25);
+  text-decoration: none; letter-spacing: .05em;
+  padding: 7px 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  transition: all .15s;
+}
+.back-link:hover { color: rgba(255,255,255,.6); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.07); }
+
+@keyframes up {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes bump {
+  0%   { transform:scale(1); }
+  45%  { transform:scale(1.06); color:rgba(255,255,255,.65); }
+  100% { transform:scale(1); }
+}
+@keyframes breathe {
+  0%,100% { opacity:1; }
+  50%      { opacity:.4; }
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes bob {
+  0%,100% { transform:translateY(0); }
+  50%      { transform:translateY(-10px); }
+}
+
+/* Mobile: 2x2 grid */
+@media(max-width:520px) {
+  .countdown-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: clamp(12px, 2.5vw, 28px);
-    width: 100%;
-    max-width: 1100px;
-    opacity: 0;
-    animation: riseIn .8s .3s ease forwards;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 100%;
   }
+  .colon { display: none; }
+  .unit { padding: 8px 4px; }
+  .unit-num { font-size: clamp(3rem, 18vw, 5rem); }
+}
 
-  .cd-block {
-    position: relative;
-    background: rgba(255,255,255,.02);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: clamp(12px, 2vw, 20px);
-    padding: clamp(20px, 4vh, 48px) 12px clamp(16px, 3vh, 36px);
-    text-align: center;
-    overflow: hidden;
-    backdrop-filter: blur(4px);
-    transition: border-color .4s;
-  }
-
-  .cd-block::before {
-    content: '';
-    position: absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
-    opacity: .6;
-  }
-
-  .cd-block::after {
-    content: '';
-    position: absolute; bottom:0; left:50%; transform:translateX(-50%);
-    width:30%; height:1px;
-    background: linear-gradient(90deg, transparent, rgba(232,197,71,.3), transparent);
-  }
-
-  .cd-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 12vw, 10rem);
-    line-height: 1;
-    color: var(--accent);
-    text-shadow:
-      0 0 60px rgba(232,197,71,.3),
-      0 0 120px rgba(232,197,71,.1);
-    letter-spacing: .03em;
-    transition: color .3s;
-    display: block;
-  }
-
-  .cd-num.pop {
-    animation: pop .2s cubic-bezier(.36,.07,.19,.97);
-  }
-
-  .cd-lbl {
-    font-size: clamp(.6rem, 1.2vw, .8rem);
-    letter-spacing: .3em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: clamp(6px, 1.5vh, 12px);
-    display: block;
-  }
-
-  /* Date display */
-  .target-date {
-    margin-top: clamp(24px, 4vh, 48px);
-    font-weight: 300;
-    font-size: clamp(.8rem, 1.5vw, 1rem);
-    letter-spacing: .2em;
-    color: rgba(255,255,255,.25);
-    text-transform: uppercase;
-    opacity: 0;
-    animation: riseIn .8s .5s ease forwards;
-  }
-
-  /* Finished overlay */
-  #finishedOverlay {
-    display: none;
-    position: fixed; inset:0; z-index:10;
-    background: rgba(7,7,13,.92);
-    flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px;
-    backdrop-filter: blur(8px);
-  }
-
-  #finishedOverlay.show { display: flex; }
-
-  .finished-emoji {
-    font-size: clamp(3rem, 8vw, 6rem);
-    animation: bounce 1s ease infinite alternate;
-  }
-
-  .finished-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.5rem, 7vw, 5rem);
-    letter-spacing: .15em;
-    background: linear-gradient(130deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    text-align: center;
-  }
-
-  .finished-sub {
-    font-size: clamp(.9rem, 2vw, 1.1rem);
-    color: rgba(232,197,71,.5);
-    letter-spacing: .15em;
-    text-align: center;
-  }
-
-  /* Corner watermark */
-  .watermark {
-    position: fixed; bottom: 20px; right: 24px;
-    font-size: .7rem; letter-spacing: .15em;
-    color: rgba(255,255,255,.1);
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: color .2s;
-  }
-  .watermark:hover { color: rgba(232,197,71,.4); }
-
-  /* Progress ring around page edge */
-  .progress-line {
-    position: fixed; bottom: 0; left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    box-shadow: 0 0 10px rgba(232,197,71,.5);
-    transition: width 1s linear;
-    width: 0%;
-  }
-
-  /* Animations */
-  @keyframes riseIn {
-    from { opacity:0; transform:translateY(20px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  @keyframes pop {
-    0%   { transform:scale(1); }
-    40%  { transform:scale(1.12); color:var(--accent2); text-shadow: 0 0 80px rgba(240,120,71,.5); }
-    100% { transform:scale(1); }
-  }
-
-  @keyframes pulse {
-    0%,100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
-    50%      { opacity:.5; transform:translate(-50%,-50%) scale(1.05); }
-  }
-
-  @keyframes bounce {
-    from { transform:translateY(0); }
-    to   { transform:translateY(-16px); }
-  }
-
-  /* Mobile */
-  @media(max-width:600px) {
-    .cd-grid { grid-template-columns: repeat(2,1fr); }
-  }
-
-  /* Landscape mobile */
-  @media(max-height:500px) {
-    .cd-num { font-size: clamp(3rem, 12vh, 6rem); }
-    .page { gap: 0; }
-    .event-name { margin-bottom: 4px; }
-    .divider { margin-bottom: 16px; }
-  }
+/* Landscape compact */
+@media(max-height:460px) and (orientation:landscape) {
+  .unit-num { font-size: clamp(2.5rem, 12vh, 5.5rem); }
+  .divline { margin-bottom: 12px; }
+  .ev-name { margin-bottom: 6px; }
+}
 </style>
 </head>
 <body>
 
-<canvas id="stars"></canvas>
-<div class="glow"></div>
+<a class="back-link" href="index.html">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+  สร้าง countdown
+</a>
 
 <div class="page">
-  <div class="event-name" id="eventName"></div>
-  <div class="divider"></div>
+  <div class="ev-name" id="evName"></div>
+  <div class="divline"></div>
 
-  <div class="cd-grid">
-    <div class="cd-block">
-      <span class="cd-num" id="days">00</span>
-      <span class="cd-lbl">วัน</span>
+  <div class="countdown-row">
+    <div class="unit">
+      <span class="unit-num" id="days">00</span>
+      <span class="unit-lbl">วัน</span>
     </div>
-    <div class="cd-block">
-      <span class="cd-num" id="hours">00</span>
-      <span class="cd-lbl">ชั่วโมง</span>
+    <span class="colon">:</span>
+    <div class="unit">
+      <span class="unit-num" id="hours">00</span>
+      <span class="unit-lbl">ชั่วโมง</span>
     </div>
-    <div class="cd-block">
-      <span class="cd-num" id="mins">00</span>
-      <span class="cd-lbl">นาที</span>
+    <span class="colon">:</span>
+    <div class="unit">
+      <span class="unit-num" id="mins">00</span>
+      <span class="unit-lbl">นาที</span>
     </div>
-    <div class="cd-block">
-      <span class="cd-num" id="secs">00</span>
-      <span class="cd-lbl">วินาที</span>
+    <span class="colon">:</span>
+    <div class="unit">
+      <span class="unit-num" id="secs">00</span>
+      <span class="unit-lbl">วินาที</span>
     </div>
   </div>
 
-  <div class="target-date" id="targetDateLabel"></div>
+  <div class="target-dt" id="targetDt"></div>
 </div>
 
-<div id="finishedOverlay">
-  <div class="finished-emoji">🎉</div>
-  <div class="finished-text" id="finishedName">ถึงวันสำคัญแล้ว!</div>
-  <div class="finished-sub">The moment has arrived</div>
+<div class="progress" id="prog"></div>
+
+<div id="done">
+  <div class="done-ico">🎉</div>
+  <div class="done-name" id="doneName">ถึงวันสำคัญแล้ว!</div>
+  <div class="done-sub">The moment has arrived</div>
 </div>
-
-<div class="progress-line" id="progressLine"></div>
-
-<a class="watermark" href="index.html">countdown.app</a>
 
 <script>
-  // ── Starfield ──
-  const canvas = document.getElementById('stars');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
+  const params = new URLSearchParams(window.location.search);
+  const name    = params.get('name') || '';
+  const dateStr = params.get('date') || '';
+  const timeStr = params.get('time') || '00:00';
 
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    stars = Array.from({length: 120}, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + .2,
-      o: Math.random() * .5 + .1,
-      speed: Math.random() * .003 + .001,
-      phase: Math.random() * Math.PI * 2
-    }));
-  }
-
-  function drawStars(t) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    stars.forEach(s => {
-      const opacity = s.o * (.5 + .5 * Math.sin(t * s.speed * 1000 + s.phase));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(232,197,71,${opacity})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(drawStars);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  requestAnimationFrame(drawStars);
-
-  // ── Parse URL params ──
-  const p = new URLSearchParams(window.location.search);
-  const name = p.get('name') || '';
-  const dateStr = p.get('date') || '';
-  const timeStr = p.get('time') || '00:00';
-
-  // Set event name
-  if (name) {
-    document.getElementById('eventName').textContent = name;
-    document.title = `${name} — Countdown`;
-  } else {
-    document.getElementById('eventName').textContent = 'COUNTDOWN';
-  }
+  // Set name
+  document.getElementById('evName').textContent = name || 'COUNTDOWN';
+  if (name) document.title = `${name} — Countdown`;
 
   // Parse target
-  let target = null;
-  let startTime = null;
-
+  let target = null, startTime = null;
   if (dateStr) {
-    const [y, mo, da] = dateStr.split('-').map(Number);
-    const [h, mi] = timeStr.split(':').map(Number);
-    target = new Date(y, mo - 1, da, h, mi, 0, 0);
+    const [y,mo,da] = dateStr.split('-').map(Number);
+    const [h,mi]    = timeStr.split(':').map(Number);
+    target    = new Date(y, mo-1, da, h, mi, 0, 0);
     startTime = new Date();
 
-    // Format display date
-    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
-    const label = target.toLocaleDateString('th-TH', opts);
-    const timeLabel = h === 0 && mi === 0 ? '' : ` · ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} น.`;
-    document.getElementById('targetDateLabel').textContent = label + timeLabel;
+    const lbl  = target.toLocaleDateString('th-TH', {year:'numeric',month:'long',day:'numeric'});
+    const tlbl = (h===0&&mi===0) ? '' : ` · ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} น.`;
+    document.getElementById('targetDt').textContent = lbl + tlbl;
   } else {
-    document.getElementById('targetDateLabel').textContent = 'ไม่ได้ระบุวันที่';
+    document.getElementById('targetDt').textContent = 'ไม่ได้ระบุวันที่';
   }
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function pad(n){ return String(n).padStart(2,'0'); }
 
-  function animPop(id) {
-    const el = document.getElementById(id);
-    el.classList.remove('pop');
-    void el.offsetWidth;
-    el.classList.add('pop');
+  function bump(id){
+    const el=document.getElementById(id);
+    el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
   }
 
-  function update() {
-    if (!target) return;
-
-    const now = new Date();
-    const diff = target - now;
-
-    // Progress bar
-    if (startTime) {
-      const total = target - startTime;
-      const elapsed = now - startTime;
-      const pct = Math.max(0, Math.min(100, (elapsed / total) * 100));
-      document.getElementById('progressLine').style.width = pct + '%';
-    }
-
-    if (diff <= 0) {
-      ['days','hours','mins','secs'].forEach(id => document.getElementById(id).textContent = '00');
-      if (name) document.getElementById('finishedName').textContent = `🎉 ${name}`;
-      document.getElementById('finishedOverlay').classList.add('show');
-      document.getElementById('progressLine').style.width = '100%';
-      return;
-    }
-
-    const s = Math.floor(diff / 1000);
-    const d = Math.floor(s / 86400);
-    const h = Math.floor((s % 86400) / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-
-    function set(id, val) {
-      const el = document.getElementById(id);
-      const nv = pad(val);
-      if (el.textContent !== nv) { el.textContent = nv; animPop(id); }
-    }
-
-    set('days', d);
-    set('hours', h);
-    set('mins', m);
-    set('secs', sec);
+  function set(id, val){
+    const el=document.getElementById(id), nv=pad(val);
+    if(el.textContent!==nv){ el.textContent=nv; bump(id); }
   }
 
-  update();
-  setInterval(update, 1000);
+  function tick(){
+    if(!target) return;
+    const now=new Date(), diff=target-now;
+
+    // Progress
+    if(startTime){
+      const pct=Math.max(0,Math.min(100,((now-startTime)/(target-startTime))*100));
+      document.getElementById('prog').style.width=pct+'%';
+    }
+
+    if(diff<=0){
+      ['days','hours','mins','secs'].forEach(id=>document.getElementById(id).textContent='00');
+      document.getElementById('doneName').textContent = name||'ถึงวันสำคัญแล้ว!';
+      document.getElementById('done').classList.add('show');
+      document.getElementById('prog').style.width='100%';
+      clearInterval(iv); return;
+    }
+
+    const s=Math.floor(diff/1000);
+    set('days',  Math.floor(s/86400));
+    set('hours', Math.floor((s%86400)/3600));
+    set('mins',  Math.floor((s%3600)/60));
+    set('secs',  s%60);
+  }
+
+  tick();
+  const iv = setInterval(tick, 1000);
 </script>
 </body>
 </html>
