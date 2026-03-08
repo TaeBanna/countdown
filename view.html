@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Countdown</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -16,21 +16,17 @@ html, body {
   overflow: hidden;
 }
 
-/* Subtle grid background */
 body::before {
-  content:'';
-  position:fixed; inset:0;
+  content:''; position:fixed; inset:0;
   background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
   background-size: 80px 80px;
   pointer-events:none;
 }
 
-/* Center glow */
 body::after {
-  content:'';
-  position:fixed; top:50%; left:50%;
+  content:''; position:fixed; top:50%; left:50%;
   transform:translate(-50%,-50%);
   width:600px; height:600px;
   background:radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 65%);
@@ -43,37 +39,32 @@ body::after {
   width:100%; height:100vh;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
-  padding:40px 28px;
+  padding:60px 16px 40px;
 }
 
-/* Event name */
 .ev-name {
-  font-size: clamp(.8rem, 2vw, 1.1rem);
-  font-weight: 300;
-  letter-spacing: .3em;
-  color: rgba(255,255,255,.35);
+  font-size: clamp(.75rem, 3vw, 1.1rem);
+  font-weight: 300; letter-spacing: .28em;
+  color: rgba(255,255,255,.5);
   text-transform: uppercase;
-  margin-bottom: 14px;
-  text-align: center;
-  opacity:0;
-  animation: up .7s .1s ease forwards;
+  margin-bottom: 12px; text-align: center;
+  opacity:0; animation: up .7s .1s ease forwards;
 }
 
-/* Thin line */
 .divline {
-  width: 48px; height: 1px;
-  background: rgba(255,255,255,.12);
-  margin-bottom: clamp(32px, 6vh, 60px);
-  opacity:0;
-  animation: up .7s .2s ease forwards;
+  width: 40px; height: 1px;
+  background: rgba(255,255,255,.15);
+  margin-bottom: clamp(20px, 5vh, 52px);
+  opacity:0; animation: up .7s .2s ease forwards;
 }
 
-/* ── HORIZONTAL STRIP ── */
-.countdown-row {
+/* ── ALWAYS HORIZONTAL ROW ── */
+.crow {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: flex-end;
   justify-content: center;
-  gap: 0;
+  flex-wrap: nowrap;
   width: 100%;
   max-width: 1000px;
   opacity:0;
@@ -84,146 +75,96 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
 }
 
+/* Font scales with vw so 4 units ALWAYS fit */
 .unit-num {
   font-family: 'DM Mono', monospace;
-  font-size: clamp(4rem, 13vw, 10rem);
-  font-weight: 300;
-  color: #fff;
+  font-size: clamp(2rem, 19vw, 10rem);
+  font-weight: 500;
+  color: #ffffff;
   line-height: 1;
-  letter-spacing: -.04em;
+  letter-spacing: -.03em;
   display: block;
   text-align: center;
-  transition: color .2s;
   white-space: nowrap;
 }
 
-.unit-num.bump { animation: bump .2s ease; }
+.unit-num.bump { animation: bump .18s ease; }
 
 .unit-lbl {
-  font-size: clamp(.58rem, 1.1vw, .75rem);
-  font-weight: 400;
-  letter-spacing: .22em;
-  color: rgba(255,255,255,.22);
+  font-size: clamp(.52rem, 2.4vw, .78rem);
+  font-weight: 500; letter-spacing: .14em;
+  color: rgba(255,255,255,.5);
   text-transform: uppercase;
-  margin-top: clamp(8px, 2vh, 14px);
+  margin-top: clamp(5px, 1.5vh, 12px);
   display: block;
 }
 
-/* Colon separator */
-.colon {
+.sep {
   font-family: 'DM Mono', monospace;
-  font-size: clamp(3rem, 9vw, 7rem);
-  font-weight: 200;
-  color: rgba(255,255,255,.1);
+  font-size: clamp(1.5rem, 12vw, 6rem);
+  font-weight: 300;
+  color: rgba(255,255,255,.18);
   line-height: 1;
-  padding: 0 clamp(4px, 1.2vw, 16px);
-  /* align with numbers */
+  flex-shrink: 0;
   align-self: flex-start;
-  margin-top: 0;
+  padding: 0 clamp(1px, 0.8vw, 10px);
   user-select: none;
 }
 
-/* Target date */
 .target-dt {
-  margin-top: clamp(24px, 4vh, 44px);
-  font-size: clamp(.7rem, 1.2vw, .88rem);
-  font-weight: 300;
-  letter-spacing: .18em;
-  color: rgba(255,255,255,.18);
-  text-transform: uppercase;
-  text-align: center;
-  opacity:0;
-  animation: up .7s .5s ease forwards;
+  margin-top: clamp(16px, 3.5vh, 40px);
+  font-size: clamp(.65rem, 2.5vw, .88rem);
+  font-weight: 300; letter-spacing: .16em;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase; text-align: center;
+  opacity:0; animation: up .7s .5s ease forwards;
 }
 
-/* Progress line */
 .progress {
-  position: fixed; bottom:0; left:0;
-  height: 1px;
-  background: rgba(255,255,255,.3);
-  transition: width 1s linear;
-  width: 0%;
+  position: fixed; bottom:0; left:0; height: 2px;
+  background: rgba(255,255,255,.35);
+  transition: width 1s linear; width: 0%;
 }
 
-/* Done overlay */
 #done {
-  display: none;
-  position: fixed; inset:0; z-index:20;
+  display: none; position: fixed; inset:0; z-index:20;
   background: #0b0b10;
-  flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 16px;
-  animation: fadeIn .5s ease;
+  flex-direction: column; align-items: center; justify-content: center; gap: 14px;
 }
 #done.show { display: flex; }
 
-.done-ico { font-size: clamp(3rem, 7vw, 5rem); animation: bob 2s ease-in-out infinite; }
-.done-name {
-  font-size: clamp(1.8rem, 5vw, 3.5rem);
-  font-weight: 600; color: #fff;
-  letter-spacing: -.02em; text-align: center;
-}
-.done-sub {
-  font-size: clamp(.8rem, 1.5vw, 1rem);
-  color: rgba(255,255,255,.25); letter-spacing: .15em; text-align: center;
-}
+.done-ico { font-size: clamp(3rem, 10vw, 5rem); animation: bob 2s ease-in-out infinite; }
+.done-name { font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 600; color: #fff; letter-spacing: -.02em; text-align: center; padding: 0 20px; }
+.done-sub { font-size: clamp(.75rem, 2vw, 1rem); color: rgba(255,255,255,.25); letter-spacing: .15em; text-align: center; }
 
-/* Back to creator */
 .back-link {
-  position: fixed; top:18px; left:18px; z-index:30;
+  position: fixed; top:16px; left:16px; z-index:30;
   display: flex; align-items: center; gap: 6px;
-  font-size: .75rem; font-weight: 500;
-  color: rgba(255,255,255,.25);
+  font-size: .73rem; font-weight: 500;
+  color: rgba(255,255,255,.3);
   text-decoration: none; letter-spacing: .05em;
   padding: 7px 12px;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 8px;
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.05);
   transition: all .15s;
 }
-.back-link:hover { color: rgba(255,255,255,.6); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.07); }
+.back-link:hover { color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.2); }
 
-@keyframes up {
-  from { opacity:0; transform:translateY(16px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes bump {
-  0%   { transform:scale(1); }
-  45%  { transform:scale(1.06); color:rgba(255,255,255,.65); }
-  100% { transform:scale(1); }
-}
-@keyframes breathe {
-  0%,100% { opacity:1; }
-  50%      { opacity:.4; }
-}
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes bob {
-  0%,100% { transform:translateY(0); }
-  50%      { transform:translateY(-10px); }
-}
-
-/* Mobile: 2x2 grid */
-@media(max-width:520px) {
-  .countdown-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    max-width: 100%;
-  }
-  .colon { display: none; }
-  .unit { padding: 8px 4px; }
-  .unit-num { font-size: clamp(3rem, 18vw, 5rem); }
-}
+@keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes bump { 0%{transform:scale(1)} 45%{transform:scale(1.07);color:rgba(255,255,255,.7)} 100%{transform:scale(1)} }
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
 /* Landscape compact */
-@media(max-height:460px) and (orientation:landscape) {
-  .unit-num { font-size: clamp(2.5rem, 12vh, 5.5rem); }
-  .divline { margin-bottom: 12px; }
-  .ev-name { margin-bottom: 6px; }
+@media(max-height:440px) and (orientation:landscape) {
+  .unit-num { font-size: clamp(2rem, 13vh, 6rem); }
+  .divline { margin-bottom: 10px; }
+  .page { padding-top: 48px; }
 }
 </style>
 </head>
@@ -238,22 +179,22 @@ body::after {
   <div class="ev-name" id="evName"></div>
   <div class="divline"></div>
 
-  <div class="countdown-row">
+  <div class="crow">
     <div class="unit">
       <span class="unit-num" id="days">00</span>
       <span class="unit-lbl">วัน</span>
     </div>
-    <span class="colon">:</span>
+    <span class="sep">:</span>
     <div class="unit">
       <span class="unit-num" id="hours">00</span>
       <span class="unit-lbl">ชั่วโมง</span>
     </div>
-    <span class="colon">:</span>
+    <span class="sep">:</span>
     <div class="unit">
       <span class="unit-num" id="mins">00</span>
       <span class="unit-lbl">นาที</span>
     </div>
-    <span class="colon">:</span>
+    <span class="sep">:</span>
     <div class="unit">
       <span class="unit-num" id="secs">00</span>
       <span class="unit-lbl">วินาที</span>
@@ -277,20 +218,17 @@ body::after {
   const dateStr = params.get('date') || '';
   const timeStr = params.get('time') || '00:00';
 
-  // Set name
   document.getElementById('evName').textContent = name || 'COUNTDOWN';
-  if (name) document.title = `${name} — Countdown`;
+  if (name) document.title = name + ' — Countdown';
 
-  // Parse target
   let target = null, startTime = null;
   if (dateStr) {
     const [y,mo,da] = dateStr.split('-').map(Number);
     const [h,mi]    = timeStr.split(':').map(Number);
     target    = new Date(y, mo-1, da, h, mi, 0, 0);
     startTime = new Date();
-
     const lbl  = target.toLocaleDateString('th-TH', {year:'numeric',month:'long',day:'numeric'});
-    const tlbl = (h===0&&mi===0) ? '' : ` · ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} น.`;
+    const tlbl = (h===0&&mi===0) ? '' : ' · ' + String(h).padStart(2,'0') + ':' + String(mi).padStart(2,'0') + ' น.';
     document.getElementById('targetDt').textContent = lbl + tlbl;
   } else {
     document.getElementById('targetDt').textContent = 'ไม่ได้ระบุวันที่';
@@ -303,7 +241,7 @@ body::after {
     el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
   }
 
-  function set(id, val){
+  function setVal(id, val){
     const el=document.getElementById(id), nv=pad(val);
     if(el.textContent!==nv){ el.textContent=nv; bump(id); }
   }
@@ -311,13 +249,10 @@ body::after {
   function tick(){
     if(!target) return;
     const now=new Date(), diff=target-now;
-
-    // Progress
     if(startTime){
       const pct=Math.max(0,Math.min(100,((now-startTime)/(target-startTime))*100));
       document.getElementById('prog').style.width=pct+'%';
     }
-
     if(diff<=0){
       ['days','hours','mins','secs'].forEach(id=>document.getElementById(id).textContent='00');
       document.getElementById('doneName').textContent = name||'ถึงวันสำคัญแล้ว!';
@@ -325,12 +260,11 @@ body::after {
       document.getElementById('prog').style.width='100%';
       clearInterval(iv); return;
     }
-
     const s=Math.floor(diff/1000);
-    set('days',  Math.floor(s/86400));
-    set('hours', Math.floor((s%86400)/3600));
-    set('mins',  Math.floor((s%3600)/60));
-    set('secs',  s%60);
+    setVal('days',  Math.floor(s/86400));
+    setVal('hours', Math.floor((s%86400)/3600));
+    setVal('mins',  Math.floor((s%3600)/60));
+    setVal('secs',  s%60);
   }
 
   tick();
